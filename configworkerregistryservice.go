@@ -24,8 +24,19 @@ func NewWorkerRegistryService() WorkerRegistryService {
 	}
 }
 
-func (receiver WorkerRegistryService) GetActiveWorkers() map[string]common.Worker {
-	return receiver.activeWorkerMap
+func (receiver WorkerRegistryService) GetActiveWorkers() map[string][]common.Worker {
+	marketWorkerMap := make(map[string][]common.Worker)
+	for _, val := range receiver.activeWorkerMap {
+		if l, ok := marketWorkerMap[val.GetBaseConfig().Market]; ok {
+			l = append(l, val)
+			marketWorkerMap[val.GetBaseConfig().Market] = l
+		} else {
+			l = make([]common.Worker, 0, 8)
+			l = append(l, val)
+			marketWorkerMap[val.GetBaseConfig().Market] = l
+		}
+	}
+	return marketWorkerMap
 }
 
 func (receiver WorkerRegistryService) GetRegisteredWorker(configName string, strategyType common.StrategyType) common.Worker {
